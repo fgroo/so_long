@@ -55,6 +55,14 @@ typedef struct
 
 typedef struct
 {
+	int		rows;
+	int		cols;
+	char	*colsstring[1000];
+} gnl_map;
+
+
+typedef struct 
+{
 	Point	exit;
 	Point	player;
 	Point	collectible;
@@ -84,9 +92,11 @@ void enqueue(Point p)
 		printf("Warteschlange ist voll!\n");
 }
 
-Point dequeue(void)
+Point	dequeue(void)
 {
-	Point p = {-1, -1}; // Ungültiger Punkt als Fehlerindikator
+	Point	p;
+
+	p = (Point){-1, -1}; // Ungültiger Punkt als Fehlerindikator
 	if (itemCount > 0)
 	{
 		p = queue[front];
@@ -95,7 +105,7 @@ Point dequeue(void)
 	}
 	else
 		printf("Warteschlange ist leer!\n");
-	return p;
+	return (p);
 }
 
 int isQueueEmpty()
@@ -104,10 +114,11 @@ int isQueueEmpty()
 }
 
 // Funktion zum Ausgeben des Arrays (zur Visualisierung)
-void printScreenIter(int screen[ROWS][COLS]) {
-    for (int i = 0; i < ROWS; i++) {
-        for (int j = 0; j < COLS; j++) {
-            printf("%d ", screen[i][j]);
+void	printScreenIter(char **screen, gnl_map map)
+{
+    for (int i = 0; i < map.rows; i++) {
+        for (int j = 0; j < map.cols; j++) {
+            printf("%c ", screen[i][j]);
         }
         printf("\n");
     }
@@ -115,32 +126,29 @@ void printScreenIter(int screen[ROWS][COLS]) {
 }
 
 // Iterative Floodfill-Funktion
-void floodFillIterative(int screen[ROWS][COLS], int startX, int startY, int oldColor, int newColor)
+void	floodFillIterative(char **screen, Point player, gnl_map map)
 {
 	Point startPoint;
 	Point current;
-	Point next;
 	int x;
 	int y;
 
-	if (oldColor == newColor) // Wenn alte und neue Farbe gleich sind, gibt es nichts zu tun
-		return;
-	startPoint = (Point){startX, startY};
+	startPoint = (Point){player.x, player.y};
 	enqueue(startPoint);
 	while (!isQueueEmpty())
 	{
 		current = dequeue();
 		x = current.x;
 		y = current.y;
-		if (x < 0 || x >= ROWS || y < 0 || y >= COLS) // 1. Gültigkeitsprüfungen
+		if (x < 0 || x >= map.rows || y < 0 || y >= map.cols) // 1. Gültigkeitsprüfungen
 			continue; // Nächstes Element aus der Warteschlange
-		if (screen[x][y] != oldColor)
+		if (screen[x][y] != '0')
 			continue;
-		screen[x][y] = newColor;				   // 2. Pixel füllen
-		next.x = x + 1; next.y = y, enqueue(next); // Unten
-		next.x = x - 1; next.y = y, enqueue(next); // Oben
-		next.x = x; next.y = y + 1, enqueue(next); // Rechts
-		next.x = x; next.y = y - 1, enqueue(next); // Links
+		screen[x][y] = '3';	// 2. Pixel füllen
+		enqueue((Point){x + 1, y}); // Nachbar unten
+		enqueue((Point){x - 1, y}); // Nachbar oben
+		enqueue((Point){x, y + 1}); // Nachbar rechts
+		enqueue((Point){x, y - 1}); // Nachbar links
 	}
 }
 
@@ -169,13 +177,13 @@ Point	insert_coordinates(int i, int j)
 	return (new.x = i, new.y = j, new);
 }
 
-components	save_map_components(char	**testscreen, int colslen, int rowslen)
+components	save_map_components(char	**testscreen, int colslen, int rows)
 {
 	components	lst;
 
 	lst = (components){0};
 	lst.i = -1;
-	while (++lst.i <= rowslen)
+	while (++lst.i <= rows)
 	{
 		lst.j = -1;
 		while (++lst.j < colslen && !lst.error_flag)
@@ -198,60 +206,58 @@ components	save_map_components(char	**testscreen, int colslen, int rowslen)
 	return (lst);
 }
 
-int main(void)
+gnl_map gnl_engine(void)
 {
-	int screen[ROWS][COLS] = {
-		{1, 1, 1, 1, 0},
-		{1, 1, 0, 1, 0},
-		{1, 0, 0, 0, 1},
-		{0, 1, 1, 1, 1},
-		{0, 0, 0, 1, 0}
-	};
-	int	fd = open("readfile", O_RDONLY);
-	char	*colsstring[1000];
-	int		colslen = 0;
-	int		rowslen = 0;
-	components map_components;
+	int		fd;
+	gnl_map gnl;
+	fd = open("readfile", O_RDONLY);
+	gnl = (gnl_map){0};
 
-	colsstring[0] = get_next_line(fd);
-	colslen = ft_strlen_mod(colsstring[rowslen]);
-	if (colslen == -1 || colslen > 1921)
-		return (perror("invalid input"), 1);
-	while (++rowslen <= 1000)
+	gnl.colsstring[0] = get_next_line(fd);
+	gnl.cols = ft_strlen_mod(gnl.colsstring[gnl.rows]);
+	if (gnl.cols == -1 || gnl.cols > 1921)
+		return (perror("invalid input"), (gnl_map){0});
+	while (++gnl.rows <= 1000)
 	{
-		colsstring[rowslen] = get_next_line(fd);
-		if (ft_strlen_mod(colsstring[rowslen]) == -1)
-			return (perror("invalid input"), 1);
-		if (!colsstring[rowslen] || !colsstring[rowslen][colslen - 1])
+		gnl.colsstring[gnl.rows] = get_next_line(fd);
+		if (ft_strlen_mod(gnl.colsstring[gnl.rows]) == -1)
+			return (perror("invalid input"), (gnl_map){0});
+		if (!gnl.colsstring[gnl.rows]
+			|| !gnl.colsstring[gnl.rows][gnl.cols - 1])
 			break ;
 	}
-	char	**testscreen;
-	testscreen = initialize_map(colsstring, --colslen, rowslen);
-	map_components = save_map_components(testscreen, colslen, rowslen);
-
-
-    int startX_iter = 3;
-    int startY_iter = 2;
-    // Wichtig: oldColor muss die Farbe des Startpixels sein!
-    if (startX_iter < 0 || startX_iter >= ROWS || startY_iter < 0 || startY_iter >= COLS) {
-        printf("Startpunkt außerhalb der Grenzen!\n");
-        return 1;
-    }
-    int oldColor_iter = screen[startX_iter][startY_iter];
-    int newColor_iter = 3;
-
-    printf("Bild vor iterativem Floodfill:\n");
-    printScreenIter(screen);
-
-    // Sicherstellen, dass der Startpunkt die zu füllende Farbe hat
-    if (screen[startX_iter][startY_iter] == oldColor_iter) {
-         floodFillIterative(screen, startX_iter, startY_iter, oldColor_iter, newColor_iter);
-    } else {
-        printf("Startpixel hat nicht die erwartete alte Farbe.\n");
-    }
-
-    printf("Bild nach iterativem Floodfill:\n");
-    printScreenIter(screen);
-    return (0);
+	return (gnl);
 }
-  
+
+int main(void)
+{
+	gnl_map gnl;
+	char	**screen;
+	components map_components;
+
+	gnl = gnl_engine();
+	printf("Bild vor iterativem Floodfill:\n");
+	
+	screen = initialize_map(gnl.colsstring, --gnl.cols, gnl.rows);
+	map_components = save_map_components(screen, gnl.cols, gnl.rows);
+	printScreenIter(screen, gnl);
+    if (map_components.player.x < 0 || map_components.player.x >= gnl.rows
+		|| map_components.player.y < 0 || map_components.player.y >= gnl.cols)
+		return (printf("Startpunkt außerhalb der Grenzen!\n"), 1);
+    screen[map_components.player.x][map_components.player.y] = '0'; // Wichtig: oldColor muss die Farbe des Startpixels sein!
+	floodFillIterative(screen, map_components.player, gnl);
+	printf("Bild nach iterativem Floodfill:\n");
+	printScreenIter(screen, gnl);
+	return (0);
+}
+	// printf("Bild vor iterativem Floodfill:\n");
+	// printScreenIter(screen);
+	// int screen[ROWS][COLS] = {
+	// 	{1, 1, 1, 1, 0},
+	// 	{1, 1, 0, 1, 0},
+	// 	{1, 0, 0, 0, 1},
+	// 	{0, 1, 1, 1, 1},
+	// 	{0, 0, 0, 1, 0}
+	// };
+    // printf("Bild nach iterativem Floodfill:\n");
+    // printScreenIter(screen);
