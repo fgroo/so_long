@@ -72,30 +72,35 @@ int front = 0;
 int rear = 0;
 int itemCount = 0;
 
-void enqueue(Point p) {
-    if (itemCount < QUEUE_SIZE) {
-        queue[rear] = p;
-        rear = (rear + 1) % QUEUE_SIZE;
-        itemCount++;
-    } else {
-        printf("Warteschlange ist voll!\n");
-    }
+void enqueue(Point p)
+{
+	if (itemCount < QUEUE_SIZE)
+	{
+		queue[rear] = p;
+		rear = (rear + 1) % QUEUE_SIZE;
+		itemCount++;
+	}
+	else
+		printf("Warteschlange ist voll!\n");
 }
 
-Point dequeue() {
-    Point p = {-1, -1}; // Ungültiger Punkt als Fehlerindikator
-    if (itemCount > 0) {
-        p = queue[front];
-        front = (front + 1) % QUEUE_SIZE;
-        itemCount--;
-    } else {
-        printf("Warteschlange ist leer!\n");
-    }
-    return p;
+Point dequeue(void)
+{
+	Point p = {-1, -1}; // Ungültiger Punkt als Fehlerindikator
+	if (itemCount > 0)
+	{
+		p = queue[front];
+		front = (front + 1) % QUEUE_SIZE;
+		itemCount--;
+	}
+	else
+		printf("Warteschlange ist leer!\n");
+	return p;
 }
 
-int isQueueEmpty() {
-    return itemCount == 0;
+int isQueueEmpty()
+{
+	return (itemCount == 0);
 }
 
 // Funktion zum Ausgeben des Arrays (zur Visualisierung)
@@ -112,29 +117,30 @@ void printScreenIter(int screen[ROWS][COLS]) {
 // Iterative Floodfill-Funktion
 void floodFillIterative(int screen[ROWS][COLS], int startX, int startY, int oldColor, int newColor)
 {
+	Point startPoint;
+	Point current;
+	Point next;
+	int x;
+	int y;
+
 	if (oldColor == newColor) // Wenn alte und neue Farbe gleich sind, gibt es nichts zu tun
 		return;
-	
-	Point startPoint = {startX, startY};
-
+	startPoint = (Point){startX, startY};
 	enqueue(startPoint);
 	while (!isQueueEmpty())
 	{
-		Point current = dequeue();
-
-		int x = current.x;
-		int y = current.y;
-
+		current = dequeue();
+		x = current.x;
+		y = current.y;
 		if (x < 0 || x >= ROWS || y < 0 || y >= COLS) // 1. Gültigkeitsprüfungen
 			continue; // Nächstes Element aus der Warteschlange
 		if (screen[x][y] != oldColor)
 			continue;
-		screen[x][y] = newColor;	// 2. Pixel füllen
-		Point next;	// 3. Nachbarn zur Warteschlange hinzufügen (4-Wege)
-		next.x = x + 1; next.y = y; enqueue(next); // Unten
-		next.x = x - 1; next.y = y; enqueue(next); // Oben
-		next.x = x; next.y = y + 1; enqueue(next); // Rechts
-		next.x = x; next.y = y - 1; enqueue(next); // Links
+		screen[x][y] = newColor;				   // 2. Pixel füllen
+		next.x = x + 1; next.y = y, enqueue(next); // Unten
+		next.x = x - 1; next.y = y, enqueue(next); // Oben
+		next.x = x; next.y = y + 1, enqueue(next); // Rechts
+		next.x = x; next.y = y - 1, enqueue(next); // Links
 	}
 }
 
