@@ -27,10 +27,6 @@ t_q	dequeue(t_q q)
 	return (q);
 }
 
-int	isQueueEmpty(t_q q)
-{
-	return (q.itemCount == 0);
-}
 
 // Funktion zum Ausgeben des Arrays (zur Visualisierung)
 void	printScreenIter(char **screen, t_map map)
@@ -54,7 +50,7 @@ void	floodfilliterative(char **screen, t_point player, t_map map)
 	q = (t_q){map.rows * map.cols, 0, 0, 0, (t_point){0, 0}, 0};
 	q.queue = malloc(sizeof(t_point) * (size_t)(map.rows * map.cols) + 1);
 	q = enqueue((t_point){player.x, player.y}, q);
-	while (!isQueueEmpty(q))
+	while ((q.itemCount != 0))
 	{
 		q = dequeue(q);
 		x = q.p.x;

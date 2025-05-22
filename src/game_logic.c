@@ -9,7 +9,7 @@
 #include <string.h>     // Für strcmp, strlen etc. (falls benötigt für Map-Parsing)
 
 // Definieren Sie die Größe jedes Tiles (z.B. Wand, Spieler) in Pixeln
-#define TILE_SIZE 50
+#define TILE_SIZE 64
 
 // Struktur für den Spielzustand
 typedef struct s_game {
@@ -35,7 +35,7 @@ typedef struct s_game {
 void    load_assets(t_comps *game);
 void    parse_map(t_comps *game, char **map_data); // Um Startpos, Collectibles etc. zu finden
 int     render_game_map(t_comps *game, t_map *map);
-int     handle_keypress(int keysym, t_comps *game, t_map *map);
+int 	handle_keypress(int keysym, void *param);
 int     cleanup_and_exit(t_comps *game);
 // void    initialize_game_struct(t_comps *game_state); // Initialisiert Zeiger auf NULL etc.
 
@@ -112,130 +112,135 @@ void load_assets(t_comps *game)
 }
 
 // Diese Funktion zeichnet den gesamten aktuellen Spielzustand.
+t_game_context	update_chars_and_combine(t_comps *game, t_map *map)
+{
+	t_game_context	game_ctx;
+
+	map->screen[game->player.x][game->player.y] = 'P';
+	map->screen[game->collectible.x][game->collectible.y] = 'C';
+	map->screen[game->exit.x][game->exit.y] = 'E';
+	game_ctx.comps = game;
+	game_ctx.map_data = map;
+	return(game_ctx);
+}
+
 int render_game_map(t_comps *game, t_map *map)
 {
     int x_tile, y_tile;
     void *current_img;
 
     mlx_clear_window(game->mlx_ptr, game->win_ptr); // Fenster leeren
+
     for (y_tile = 0; y_tile < map->rows; y_tile++) {
         for (x_tile = 0; x_tile < map->cols; x_tile++) {
             int pixel_x = x_tile * TILE_SIZE;
             int pixel_y = y_tile * TILE_SIZE;
             char tile_type = map->screen[y_tile][x_tile];
-
             current_img = NULL; // Standardmäßig nichts zeichnen oder Pfadbild
-            if (tile_type == '1') {
+            if (tile_type == '1')
                 current_img = game->img_wall;
-            } else if (tile_type == '3') {
+            else if (tile_type == '3')
                 current_img = game->img_path;
-            } else if (tile_type == 'C') {
+            else if (tile_type == 'C')
                 current_img = game->img_collectible;
-            } else if (tile_type == 'E') {
+            else if (tile_type == 'E')
+			{
                 if (game->collectibles_found == 1)
                 	current_img = game->img_exit_open;
                 else
                 	current_img = game->img_exit_closed;
-                
             }
-            
-            // Zeichne das Pfad-Bild immer zuerst, falls andere Elemente transparent sind
-            // oder um sicherzustellen, dass der Hintergrund gezeichnet wird.
-            if (game->img_path) {
+            if (game->img_path)
                  mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->img_path, pixel_x, pixel_y);
-            }
-
-            if (current_img != NULL && current_img != game->img_path) { // Zeichne spezifisches Tile über den Pfad
+            if (current_img != NULL && current_img != game->img_path) // Zeichne spezifisches Tile über den Pfad
                 mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, current_img, pixel_x, pixel_y);
-            }
         }
     }
 
     // Zeichne den Spieler an seiner aktuellen Position (über anderen Tiles)
     if (game->img_player) {
         mlx_put_image_to_window(game->mlx_ptr, game->win_ptr, game->img_player,
-                                game->player.x * TILE_SIZE,
-                                game->player.y * TILE_SIZE);
+                                (game->player.y * 64),
+                                (game->player.x * TILE_SIZE));
     }
-    
     // Optional: Spielinformationen wie Züge oder gesammelte Items anzeigen
     // char move_str[50];
     // sprintf(move_str, "Moves: %d Collectibles: %d/%d", game->player_moves, game->collectibles_found, game->collectibles_total);
     // mlx_string_put(game->mlx_ptr, game->win_ptr, 10, 10, 0xFFFFFF, move_str);
-
     return (0);
 }
 
 
 // Diese Funktion wird aufgerufen, wenn eine Taste gedrückt wird.
-int handle_keypress(int keysym, t_comps *game, t_map *map)
+int handle_keypress(int keysym, void *param)
 {
+	t_game_context	*ctx;
     int next_x;
     int next_y;
 	char target_tile;
 
-	next_x = game->player.x;
-	next_y = game->player.y;
+	ctx = (t_game_context *)param;
+	next_x = ctx->comps->player.x;
+	next_y = ctx->comps->player.y;
     if (keysym == XK_Escape)// XK_Escape anstelle von 65307 für bessere Lesbarkeit
-		cleanup_and_exit(game);
+		cleanup_and_exit(ctx->comps);
 
 
     // Spielerbewegungen basierend auf Tasten
     if (keysym == XK_w || keysym == XK_Up)    // W oder Pfeil nach oben
-        next_y--;
-    else if (keysym == XK_a || keysym == XK_Left)  // A oder Pfeil nach links
         next_x--;
+    else if (keysym == XK_a || keysym == XK_Left)  // A oder Pfeil nach links
+        next_y--;
     else if (keysym == XK_s || keysym == XK_Down)  // S oder Pfeil nach unten
-        next_y++;
-    else if (keysym == XK_d || keysym == XK_Right) // D oder Pfeil nach rechts
         next_x++;
+    else if (keysym == XK_d || keysym == XK_Right) // D oder Pfeil nach rechts
+        next_y++;
     else
         return (0); // Keine relevante Taste gedrückt
 
     // Überprüfe Kartengrenzen
-    if (next_x < 0 || next_x >= map->rows||
-        next_y < 0 || next_y >= map->cols)
+    if (next_x < 0 || next_x >= ctx->map_data->rows||
+        next_y < 0 || next_y >= ctx->map_data->cols)
         return (0); // Außerhalb der Karte
 
-    target_tile = map->screen[next_y][next_x];
+    target_tile = ctx->map_data->screen[next_x][next_y];
 
     if (target_tile == '1') { // Wand
         return (0); // Bewegung nicht möglich
     }
 
     // Gültige Bewegung: Spieler aktualisieren
-    game->player.x = next_x;
-    game->player.y = next_y;
-    game->player_moves++;
-    printf("Moves: %d\n", game->player_moves);
+    ctx->comps->player.x = next_x;
+    ctx->comps->player.y = next_y;
+    ctx->comps->player_moves++;
+    printf("Moves: %d\n", ctx->comps->player_moves);
 
 
     if (target_tile == 'C') { // Collectible
-        game->collectibles_found++;
-        map->screen[next_y][next_x] = '3'; // Markiere Collectible als eingesammelt (wird zu Pfad)
-        printf("Collected: /%d\n", game->collectibles_found);
+        ctx->comps->collectibles_found++;
+        ctx->map_data->screen[next_x][next_y] = '3'; // Markiere Collectible als eingesammelt (wird zu Pfad)
+        printf("Collected: /%d\n", ctx->comps->collectibles_found);
     } else if (target_tile == 'E') { // Ausgang
-        if (game->collectibles_found == 1) {
-            printf("Congratulations! You reached the exit in %d moves!\n", game->player_moves);
-            cleanup_and_exit(game);
+        if (ctx->comps->collectibles_found == 1) {
+            printf("Congratulations! You reached the exit in %d moves!\n", ctx->comps->player_moves);
+            cleanup_and_exit(ctx->comps);
         } else {
-            printf("Exit is closed! Collect item first (/%d).\n", game->collectibles_found);
+            printf("Exit is closed! Collect item first (/%d).\n", ctx->comps->collectibles_found);
             // Spieler kann auf das Exit-Feld gehen, aber das Spiel endet nicht
         }
     }
 
     // Neuzeichnen der Szene nach jeder gültigen Bewegung
-    render_game_map(game, map);
+    render_game_map(ctx->comps, ctx->map_data);
     return (0);
 }
 
 
 int	main(void)
 {
-	//t_game	game_state; // Spielzustand auf dem Stack oder dynamisch allokieren
 	t_map	gnl;
-	//char	**screen; // replaced with gnl.screen
 	t_comps	map_components;
+	t_game_context	game_ctx;
 
 	gnl = gnl_engine();
 	printf("Bild vor iterativem Floodfill:\n");
@@ -247,6 +252,7 @@ int	main(void)
 		return (printf("Startpunkt außerhalb der Grenzen!\n"), 1);
 	gnl.screen = rdy_for_floodfill(gnl.screen, map_components); // Wichtig: oldColor muss die Farbe des Startpixels sein!
 	floodfilliterative(gnl.screen, map_components.player, gnl);
+	game_ctx = update_chars_and_combine(&map_components, &gnl);
 	printf("Bild nach iterativem Floodfill:\n");
 	printScreenIter(gnl.screen, gnl);
 	
@@ -261,7 +267,7 @@ int	main(void)
 	load_assets(&map_components);
 
 	// Erstelle das Fenster
-	map_components.win_ptr = mlx_new_window(map_components.mlx_ptr, (gnl.cols) * 64, gnl.rows * 64, "so_long Game");
+	map_components.win_ptr = mlx_new_window(map_components.mlx_ptr, (gnl.cols) * 65, gnl.rows * 64, "so_long Game");
 	if (!map_components.win_ptr)
 	{
 		fprintf(stderr, "Error: mlx_new_window() failed.\n");
@@ -271,7 +277,7 @@ int	main(void)
 
 	// Registriere Hook-Funktionen
 	// mlx_key_hook wird für Tastenanschläge (KeyRelease-Event) verwendet
-	mlx_key_hook(map_components.win_ptr, handle_keypress, &map_components);
+	mlx_key_hook(map_components.win_ptr, handle_keypress, &game_ctx);
 
 	// Hook für das Schließen des Fensters über den [X]-Button des Window Managers
 	// DestroyNotify ist Event-Typ 17. StructureNotifyMask ist (1L<<17).

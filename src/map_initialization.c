@@ -8,7 +8,6 @@ char	**initialize_map(char **colsstring, int cols, int rows)
 
 	i = -1;
 	screen = malloc(sizeof(char *) * ((size_t)rows + 1));
-	screen[rows] = NULL;
 	if (!screen)
 		return (perror("malloc fail"), NULL);
 	while (++i < rows)
