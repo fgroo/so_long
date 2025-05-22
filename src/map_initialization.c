@@ -1,25 +1,26 @@
-#include "so_long.h"
+#include "../inc/so_long.h"
 
-char	**initialize_map(char	**colsstring, int	cols, int rows)
+char	**initialize_map(char **colsstring, int cols, int rows)
 {
 	int		i;
 	int		j;
 	char	**screen;
 
 	i = -1;
-	screen = malloc(sizeof(char *) * (rows + 1));
+	screen = malloc(sizeof(char *) * ((size_t)rows + 1));
 	if (!screen)
 		return (perror("malloc fail"), NULL);
 	while (++i <= rows)
 	{
 		j = -1;
-		screen[i] = malloc(cols + 1);
+		screen[i] = malloc((size_t)cols + 1);
 		screen[i][cols] = 0;
-		while (++j < cols)
-				screen[i][j] = colsstring[i][j];
+		while (++j <= cols)
+			screen[i][j] = colsstring[i][j];
 	}
 	return (screen);
 }
+
 t_point	insert_coordinates(int i, int j)
 {
 	t_point	new;
@@ -27,7 +28,7 @@ t_point	insert_coordinates(int i, int j)
 	return (new.x = i, new.y = j, new);
 }
 
-t_comps	save_map_components(char	**testscreen, int cols, int rows)
+t_comps	save_map_components(char **testscreen, int cols, int rows)
 {
 	t_comps	lst;
 
@@ -46,7 +47,7 @@ t_comps	save_map_components(char	**testscreen, int cols, int rows)
 				lst.exit = insert_coordinates(lst.i, lst.j);
 			else if (testscreen[lst.i][lst.j] == '0'
 				|| testscreen[lst.i][lst.j] == '1')
-				continue;
+				continue ;
 			else
 				lst.error_flag = 1;
 		}
@@ -56,13 +57,13 @@ t_comps	save_map_components(char	**testscreen, int cols, int rows)
 	return (lst);
 }
 
-t_map gnl_engine(void)
+t_map	gnl_engine(void)
 {
 	int		fd;
-	t_map gnl;
+	t_map	gnl;
+
 	fd = open("readfile", O_RDONLY);
 	gnl = (t_map){0};
-
 	gnl.colsstring[0] = get_next_line(fd);
 	gnl.cols = ft_strlen_mod(gnl.colsstring[gnl.rows]);
 	if (gnl.cols == -1 || gnl.cols > 1921)
