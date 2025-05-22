@@ -56,7 +56,8 @@ clean:
 	rm -f $(OBJ)
 	rm -rf $(OBJ_DIR)
 	rm $(LIBFT_DIR)$(LIBFT)
-	rm ./textures/*.Identifier
+	rm $(LIBFT_DIR)*.o
+	rm -f ./textures/*.Identifier
 fclean: clean
 	rm -f $(NAME)
 re: clean all

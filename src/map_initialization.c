@@ -8,14 +8,15 @@ char	**initialize_map(char **colsstring, int cols, int rows)
 
 	i = -1;
 	screen = malloc(sizeof(char *) * ((size_t)rows + 1));
+	screen[rows] = NULL;
 	if (!screen)
 		return (perror("malloc fail"), NULL);
-	while (++i <= rows)
+	while (++i < rows)
 	{
 		j = -1;
 		screen[i] = malloc((size_t)cols + 1);
 		screen[i][cols] = 0;
-		while (++j <= cols)
+		while (++j < cols)
 			screen[i][j] = colsstring[i][j];
 	}
 	return (screen);
@@ -34,7 +35,7 @@ t_comps	save_map_components(char **testscreen, int cols, int rows)
 
 	lst = (t_comps){0};
 	lst.i = -1;
-	while (++lst.i <= rows)
+	while (++lst.i < rows)
 	{
 		lst.j = -1;
 		while (++lst.j < cols && !lst.error_flag)
@@ -77,7 +78,7 @@ t_map	gnl_engine(void)
 			|| !gnl.colsstring[gnl.rows][gnl.cols - 1])
 			break ;
 	}
-	return (gnl);
+	return (++gnl.rows, --gnl.cols, gnl);
 }
 
 char	**rdy_for_floodfill(char **screen, t_comps map_components)

@@ -240,7 +240,7 @@ int	main(void)
 	gnl = gnl_engine();
 	printf("Bild vor iterativem Floodfill:\n");
 	gnl.screen = initialize_map(gnl.colsstring, gnl.cols, gnl.rows);
-	map_components = save_map_components(gnl.screen, gnl.cols, gnl.rows++);
+	map_components = save_map_components(gnl.screen, gnl.cols, gnl.rows);
 	printScreenIter(gnl.screen, gnl);
 	if (map_components.player.x < 0 || map_components.player.x >= gnl.rows
 		|| map_components.player.y < 0 || map_components.player.y >= gnl.cols)
