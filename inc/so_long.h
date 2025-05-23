@@ -55,11 +55,18 @@ typedef struct s_comps
 	void	*win_ptr;
 } t_comps;
 
+typedef struct s_game_context
+{
+	t_comps	*comps;
+	t_map	*map_data;
+	// You could also include other global game resources here if needed
+}	t_game_context;
+
 char	*get_next_line(int fd);
 int		ft_strlen_mod(char *s);
 t_q enqueue(t_point p, t_q q);
 t_q	dequeue(t_q q);
-int isQueueEmpty(t_q q);
+
 void	printScreenIter(char **screen, t_map map);
 void	floodfilliterative(char **screen, t_point player, t_map map);
 char	**initialize_map(char	**colsstring, int	cols, int rows);
@@ -71,7 +78,7 @@ char	**rdy_for_floodfill(char **screen, t_comps map_components);
 void	load_assets(t_comps *game);
 void	parse_map(t_comps *game, char **map_data); // Um Startpos, Collectibles etc. zu finden
 int		render_game_map(t_comps *game, t_map *map);
-int		handle_keypress(int keysym, t_comps *game, t_map *map);
+int 	handle_keypress(int keysym, void *param);
 int		cleanup_and_exit(t_comps *game);
 t_map	gnl_engine(void);
 
