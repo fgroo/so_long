@@ -6,7 +6,7 @@
 /*   By: nix <nix@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/06 21:44:20 by nix               #+#    #+#             */
-/*   Updated: 2025/05/21 22:01:18 by nix              ###   ########.fr       */
+/*   Updated: 2025/05/24 22:11:59 by nix              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@ int	ft_strlen_mod(char *s)
 	i = 0;
 	while (s && s[i])
 	{
-		if (!(s[i] == '0' || s[i] == '1' || s[i] == 'C' || s[i] == 'E' || s[i] == 'P' || s[i] == '\n'))
+		if (!(s[i] == '0' || s[i] == '1' || s[i] == 'C'
+				|| s[i] == 'E' || s[i] == 'P' || s[i] == '\n'))
 			return (-1);
 		i++;
 	}
@@ -81,7 +82,7 @@ char	*ft_strjoin(char *s1, char *s2)
 	return (join);
 }
 
-char	*ft_substr(char* s, unsigned int start, size_t len)
+char	*ft_substr(char *s, unsigned int start, size_t len)
 {
 	size_t	s_len;
 	char	*sub;

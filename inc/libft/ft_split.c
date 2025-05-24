@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fgorlich <fgorlich@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nix <nix@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/17 18:26:54 by fgorlich          #+#    #+#             */
-/*   Updated: 2024/11/22 19:59:06 by fgorlich         ###   ########.fr       */
+/*   Updated: 2025/05/24 22:12:17 by nix              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ char	**ft_columns(char **etagen, const char *etage, char c)
 				return (0);
 			ft_memcpy(*etagen, words, etage - words);
 			(*etagen)[etage - words] = '\0';
-			etagen++; 
+			etagen++;
 		}
 	}
 	*etagen = 0;

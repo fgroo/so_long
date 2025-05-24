@@ -1,4 +1,4 @@
-#include "../inc/so_long.h"
+#include "so_long.h"
 
 char	**initialize_map(char **colsstring, int cols, int rows)
 {
@@ -7,13 +7,20 @@ char	**initialize_map(char **colsstring, int cols, int rows)
 	char	**screen;
 
 	i = -1;
-	screen = malloc(sizeof(char *) * ((size_t)rows + 1));
+	screen = (char **)malloc(sizeof(char *) * (((size_t)rows) + 1));
+	screen[rows] = NULL;
 	if (!screen)
 		return (perror("malloc fail"), NULL);
 	while (++i < rows)
 	{
 		j = -1;
 		screen[i] = malloc((size_t)cols + 1);
+		if (!screen[i])
+		{
+			while (screen[--i])
+				free(screen[i]);
+			return (free(screen), NULL);
+		}
 		screen[i][cols] = 0;
 		while (++j < cols)
 			screen[i][j] = colsstring[i][j];
@@ -53,7 +60,7 @@ t_comps	save_map_components(char **testscreen, int cols, int rows)
 		}
 	}
 	if (!lst.error_flag && (!lst.check_p || !lst.check_e))
-		lst.error_flag = 1; // Setze Fehler, wenn P oder E fehlen
+		lst.error_flag = 1;
 	return (lst);
 }
 
@@ -71,7 +78,8 @@ t_map	gnl_engine(void)
 	while (++gnl.rows <= 1000)
 	{
 		gnl.colsstring[gnl.rows] = get_next_line(fd);
-		if (ft_strlen_mod(gnl.colsstring[gnl.rows]) == 0)
+		if (!ft_strlen_mod(gnl.colsstring[gnl.rows])
+			|| ft_strlen_mod(gnl.colsstring[gnl.rows]) > gnl.cols)
 			return (perror("invalid input"), (t_map){0});
 		if (!gnl.colsstring[gnl.rows]
 			|| !gnl.colsstring[gnl.rows][gnl.cols - 1])

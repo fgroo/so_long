@@ -13,14 +13,18 @@ CCFLAGS += -Wextra
 CCFLAGS += -Werror
 CCFLAGS += -Wpedantic
 CCFLAGS += -Wconversion
-CCFLAGS += -O2
+# CCFLAGS += -O2
+CCFLAGS += -Wno-newline-eof
 
 CPPFLAGS += -Imlx
+CPPFLAGS += -I$(INC_DIR)
 CPPFLAGS += -I$(MLX_DIR)
+CPPFLAGS += -I$(LIBFT_DIR)
 
 LDLIBS += -lmlx
 LDLIBS += -lX11
 LDLIBS += -lXext
+LDLIBS += -lft
 
 LDFLAGS	+= -L/usr/local/lib/
 LDFLAGS	+= -L/usr/lib/
@@ -31,23 +35,18 @@ LDFLAGS += -L$(LIBFT_DIR)
 vpath %.c $(SRC_DIR)
 SRC += map_initialization.c
 SRC += map_validation.c
-SRC += game_logic.c
+SRC += main.c
+SRC += loading_and_cleaning.c
 
 OBJ		:= $(SRC:.c=.o)
 OBJ		:= $(addprefix $(OBJ_DIR), $(OBJ))
-
-vpath $(INC_DIR)
-INC += so_long.h
-INC += $(LIBFT_DIR)$(LIBFT)
-
-
 
 all: $(NAME)
 
 $(LIBFT_DIR)$(LIBFT):
 	make -C $(LIBFT_DIR)
 $(NAME): $(OBJ) $(LIBFT_DIR)$(LIBFT)
-	cc -g $(OBJ) $(LDFLAGS) $(LDLIBS) $(INC_DIR)$(INC) -o $@
+	cc -g $(OBJ) $(LDFLAGS) $(LDLIBS) -o $@
 $(OBJ_DIR)%.o: %.c | $(OBJ_DIR)
 	cc -g $(CCFLAGS) $(CPPFLAGS) -c $< -o $@
 $(OBJ_DIR):
@@ -55,10 +54,13 @@ $(OBJ_DIR):
 clean:
 	rm -f $(OBJ)
 	rm -rf $(OBJ_DIR)
-	rm $(LIBFT_DIR)$(LIBFT)
-	rm $(LIBFT_DIR)*.o
+	make -C $(LIBFT_DIR) clean
 	rm -f ./textures/*.Identifier
+	rm -f ./src/*.Identifier
+	rm -f ./*.Identifier
+	rm -f ./inc/libft/*.Identifier
 fclean: clean
 	rm -f $(NAME)
+	make -C $(LIBFT_DIR) fclean
 re: clean all
 
