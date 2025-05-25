@@ -1,6 +1,6 @@
 #include "so_long.h"
 
-void	if_del(t_game_context *ctx)
+void	if_del(t_game_ctx *ctx)
 {
 	if (ctx->comps->img_player)
 		mlx_destroy_image(ctx->comps->mlx_ptr, ctx->comps->img_player);
@@ -20,9 +20,16 @@ void	if_del(t_game_context *ctx)
 	free(ctx->comps->mlx_ptr);
 }
 
-int	cleanup_and_exit(t_game_context *ctx)
+int	cleanup_and_exit(t_game_ctx *ctx)
 {
-	if (!ctx->comps->mlx_ptr)
+	if (!ctx->comps)
+	{
+		while (ctx->map_data->rows
+			&& ctx->map_data->string[--ctx->map_data->rows])
+			free(ctx->map_data->string[ctx->map_data->rows]);
+		return (0);
+	}
+	if (!ctx->comps->mlx_ptr && !ctx->comps->error_flag)
 		return (1);
 	if (ctx->comps->mlx_ptr)
 		if_del(ctx);
@@ -30,19 +37,20 @@ int	cleanup_and_exit(t_game_context *ctx)
 	{
 		while (ctx->map_data->rows
 			&& ctx->map_data->screen[--ctx->map_data->rows])
-			(free(ctx->map_data->screen[ctx->map_data->rows]), 
-				free(ctx->map_data->colsstring[ctx->map_data->rows]));
+			(free(ctx->map_data->screen[ctx->map_data->rows]),
+				free(ctx->map_data->string[ctx->map_data->rows]));
 		free(ctx->map_data->screen);
 	}
 	printf("Game exited.\n");
 	exit(0);
 }
 
-void	load_assets(t_game_context *game)
+void	load_assets(t_game_ctx *game)
 {
 	int	img_w;
 	int	img_h;
 
+	update_chars(game);
 	game->comps->img_path = mlx_xpm_file_to_image
 		(game->comps->mlx_ptr, "./textures/path_b.xpm", &img_w, &img_h);
 	game->comps->img_wall = mlx_xpm_file_to_image
@@ -60,10 +68,11 @@ void	load_assets(t_game_context *game)
 		|| !game->comps->img_exit_open
 		|| !game->comps->img_exit_closed)
 	{
-		fprintf(stderr, "Error: Could not load all game assets (XPM images).\n");
+		fprintf(stderr, "Error\nCould not load all game assets.\n");
 		cleanup_and_exit(game);
 	}
 }
+
 void	*if_img(char tile_type, t_comps *game)
 {
 	void	*current_img;
@@ -85,14 +94,14 @@ void	*if_img(char tile_type, t_comps *game)
 		current_img = NULL;
 	return (current_img);
 }
-t_game_context	update_chars_and_combine(t_comps *game, t_map *map)
-{
-	t_game_context	game_ctx;
 
-	map->screen[game->player.x][game->player.y] = 'P';
-	map->screen[game->collectible.x][game->collectible.y] = 'C';
-	map->screen[game->exit.x][game->exit.y] = 'E';
-	game_ctx.comps = game;
-	game_ctx.map_data = map;
-	return (game_ctx);
+t_game_ctx	combine_structs(t_comps *game, t_map *map)
+{
+	t_game_ctx	ctx;
+
+	ctx.comps = game;
+	ctx.map_data = map;
+	if (!game || !*map->screen)
+		cleanup_and_exit(&ctx);
+	return (ctx);
 }

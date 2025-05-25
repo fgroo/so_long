@@ -32,6 +32,7 @@ $(SOURCE):
 
 clean:
 	rm -f $(OBJECTS)
+	rm -f $(BONUSOJ)
 
 fclean: clean
 	rm -f $(NAME)

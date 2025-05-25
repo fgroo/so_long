@@ -13,7 +13,7 @@ CCFLAGS += -Wextra
 CCFLAGS += -Werror
 CCFLAGS += -Wpedantic
 CCFLAGS += -Wconversion
-# CCFLAGS += -O2
+CCFLAGS += -O2
 CCFLAGS += -Wno-newline-eof
 
 CPPFLAGS += -Imlx
@@ -46,9 +46,9 @@ all: $(NAME)
 $(LIBFT_DIR)$(LIBFT):
 	make -C $(LIBFT_DIR)
 $(NAME): $(OBJ) $(LIBFT_DIR)$(LIBFT)
-	cc -g $(OBJ) $(LDFLAGS) $(LDLIBS) -o $@
+	cc $(OBJ) $(LDFLAGS) $(LDLIBS) -o $@
 $(OBJ_DIR)%.o: %.c | $(OBJ_DIR)
-	cc -g $(CCFLAGS) $(CPPFLAGS) -c $< -o $@
+	cc $(CCFLAGS) $(CPPFLAGS) -c $< -o $@
 $(OBJ_DIR):
 	mkdir -vp $@
 clean:

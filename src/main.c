@@ -29,7 +29,7 @@ void	render_game_map(t_comps *game, t_map *map)
 			game->img_player, game->player.y * 64, game->player.x * 64);
 }
 
-int	rec_mov(char target_tile, t_game_context *ctx, t_point *p)
+int	rec_mov(char target_tile, t_game_ctx *ctx, t_point *p)
 {
 	target_tile = ctx->map_data->screen[p->x][p->y];
 	if (target_tile == '1')
@@ -41,7 +41,7 @@ int	rec_mov(char target_tile, t_game_context *ctx, t_point *p)
 	if (target_tile == 'C')
 	{
 		ctx->map_data->screen[p->x][p->y] = '3';
-		printf("Collected: /%d\n", ++ctx->comps->collectibles_found);
+		printf("Collected: %d\n", ++ctx->comps->collectibles_found);
 	}
 	else if (target_tile == 'E')
 	{
@@ -60,10 +60,10 @@ int	rec_mov(char target_tile, t_game_context *ctx, t_point *p)
 
 int	handle_keypress(int keysym, void *param)
 {
-	t_game_context	*ctx;
-	t_point			p;
+	t_game_ctx	*ctx;
+	t_point		p;
 
-	ctx = (t_game_context *)param;
+	ctx = (t_game_ctx *)param;
 	p.x = ctx->comps->player.x;
 	p.y = ctx->comps->player.y;
 	if (keysym == XK_Escape)
@@ -83,30 +83,30 @@ int	handle_keypress(int keysym, void *param)
 		return (0);
 	if (rec_mov((char){0}, ctx, &p) == 1)
 		return (0);
-	render_game_map(ctx->comps, ctx->map_data);
-	return (0);
+	return (render_game_map(ctx->comps, ctx->map_data), 0);
 }
 
-int	main(void)
+int	main(int ac, char **av)
 {
-	t_map			gnl;
-	t_comps			map_components;
-	t_game_context	game_ctx;
+	t_map		gnl;
+	t_comps		map_components;
+	t_game_ctx	game_ctx;
 
-	gnl = gnl_engine();
-	gnl.screen = initialize_map(gnl.colsstring, gnl.cols, gnl.rows);
+	gnl = gnl_engine(ac, av[1]);
+	gnl.screen = initialize_map(gnl.string, gnl.cols, gnl.rows);
 	map_components = save_map_components(gnl.screen, gnl.cols, gnl.rows);
 	gnl.screen = rdy_for_floodfill(gnl.screen, map_components);
-	floodfilliterative(gnl.screen, map_components.player, gnl);
-	game_ctx = update_chars_and_combine(&map_components, &gnl);
+	game_ctx = combine_structs(&map_components, &gnl);
+	if (floodfilliterative(&game_ctx, map_components.player, gnl) == -1)
+		return (perror("Error\nout of bounce"), 1);
 	game_ctx.comps->mlx_ptr = mlx_init();
 	if (!game_ctx.comps->mlx_ptr)
-		return (fprintf(stderr, "Error: mlx_init() failed.\n"), 1);
+		return (fprintf(stderr, "Error\nmlx_init() failed.\n"), 1);
 	load_assets(&game_ctx);
 	game_ctx.comps->win_ptr = mlx_new_window
 		(game_ctx.comps->mlx_ptr, gnl.cols * 64, gnl.rows * 64, "so_long");
 	if (!game_ctx.comps->win_ptr)
-		return (fprintf(stderr, "Error: mlx_new_window() failed.\n")
+		return (fprintf(stderr, "Error\nmlx_new_window() failed.\n")
 			, cleanup_and_exit(&game_ctx), 1);
 	mlx_key_hook(game_ctx.comps->win_ptr, handle_keypress, &game_ctx);
 	mlx_hook(game_ctx.comps->win_ptr, 17, 0, cleanup_and_exit, &game_ctx);
