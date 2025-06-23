@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   so_long.h                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: fgorlich <fgorlich@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/26 17:00:00 by fgorlich          #+#    #+#             */
+/*   Updated: 2025/05/26 18:25:24 by fgorlich         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef SO_LONG_H
 # define SO_LONG_H
 
@@ -39,6 +51,7 @@ typedef struct s_comps
 	t_point	player;
 	t_point	collectible;
 	int		exit_reachable;
+	int		collectible_reachable;
 	int		error_flag;
 	int		check_e;
 	int		check_p;

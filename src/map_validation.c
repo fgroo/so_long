@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   map_validation.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: fgorlich <fgorlich@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/26 16:59:48 by fgorlich          #+#    #+#             */
+/*   Updated: 2025/05/26 18:35:03 by fgorlich         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 
 t_q	enqueue(t_point p, t_q q)
@@ -24,6 +36,9 @@ t_q	dequeue(t_q q, t_game_ctx *ctx)
 		if (ctx->comps->exit.x == q.p.x
 			&& ctx->comps->exit.y == q.p.y)
 			ctx->comps->exit_reachable = 1;
+		if (ctx->comps->collectible.x == q.p.x
+			&& ctx->comps->collectible.y == q.p.y)
+			ctx->comps->collectible_reachable = 1;
 	}
 	else
 		printf("Warteschlange ist leer!\n");
@@ -72,7 +87,7 @@ int	floodfilliterative(t_game_ctx *ctx, t_point player, t_map map)
 		q = enqueue((t_point){q.p.x, q.p.y - 1}, q);
 	}
 	free(q.queue);
-	if (ctx->comps->exit_reachable)
+	if (ctx->comps->exit_reachable && ctx->comps->collectible_reachable)
 		return (ctx->map_data->screen = map.screen, 0);
 	return (++ctx->comps->error_flag, cleanup_and_exit(ctx), -1);
 }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   map_initialization.c                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: fgorlich <fgorlich@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/26 16:59:46 by fgorlich          #+#    #+#             */
+/*   Updated: 2025/05/26 18:38:40 by fgorlich         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 
 char	**initialize_map(char **colsstring, int cols, int rows)
@@ -77,20 +89,18 @@ t_map	gnl_engine(int ac, char	*av)
 	gnl.cols = ft_strlen_mod(gnl.string[gnl.rows]);
 	if (!gnl.string[0] || gnl.cols == 0 || gnl.cols > 1921)
 		return (perror("Error\ninvalid input"), (t_map){0});
-	while (++gnl.rows < 1000 && ft_strlen_mod(gnl.string[gnl.rows]) < gnl.cols)
+	while (gnl.string[gnl.rows++] && gnl.rows < 999)
 	{
 		gnl.string[gnl.rows] = get_next_line(fd);
-		if (!ft_strlen_mod(gnl.string[gnl.rows])
-			|| ft_strlen_mod(gnl.string[gnl.rows]) > gnl.cols)
+		if (!ft_strlen_mod(gnl.string[gnl.rows]))
+			(free(gnl.string[gnl.rows]), gnl.string[gnl.rows] = NULL);
+		else if (gnl.string[gnl.rows] && (ft_strlen_mod(gnl.string[gnl.rows])
+				< gnl.cols - 1 || ft_strlen_mod
+				(gnl.string[gnl.rows]) > gnl.cols))
 			return (close(fd), perror("Error\n"), combine_structs
 				((t_comps *){0}, &gnl), exit (1), (t_map){0});
-		if (ft_strlen_mod(gnl.string[gnl.rows]) < gnl.cols - 1)
-			return (close(fd), perror("Error\n"), combine_structs
-				((t_comps *){0}, &gnl), exit (1), (t_map){0});
-		else if (!gnl.string[gnl.rows][gnl.cols - 1])
-			break ;
 	}
-	return (close(fd), ++gnl.rows, --gnl.cols, gnl);
+	return (close(fd), --gnl.rows, --gnl.cols, gnl);
 }
 
 char	**rdy_for_floodfill(char **screen, t_comps map_components)

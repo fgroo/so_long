@@ -28,7 +28,7 @@ $(NAME): $(OBJECTS)
 	ar src $(NAME) $(OBJECTS) 
 
 $(SOURCE):
-	gcc $(FLAGS) -c $(SOURCE) $(BONUS)
+	cc $(FLAGS) -c $(SOURCE) $(BONUS)
 
 clean:
 	rm -f $(OBJECTS)

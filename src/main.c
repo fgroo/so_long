@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: fgorlich <fgorlich@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/26 16:59:43 by fgorlich          #+#    #+#             */
+/*   Updated: 2025/05/26 17:05:05 by fgorlich         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "so_long.h"
 
 void	render_game_map(t_comps *game, t_map *map)
@@ -52,7 +64,7 @@ int	rec_mov(char target_tile, t_game_ctx *ctx, t_point *p)
 			cleanup_and_exit(ctx);
 		}
 		else
-			printf("Exit is closed! Collect item first (/%d).\n",
+			printf("Exit is closed! Collect item first (%d).\n",
 				ctx->comps->collectibles_found);
 	}
 	return (0);
